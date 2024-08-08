@@ -27,7 +27,7 @@ app.use(
 		origin: "http://localhost:5173",
 	})
 );
-app.get("/api/test", (req, res) => {
+app.get("api/test", (req, res) => {
 	res.send("test OK");
 });
 
@@ -56,7 +56,7 @@ async function uploadToS3(path, originalFilename, mimetype) {
 	return `https://${bucket}.s3.amazonaws.com/${newFilename}`;
 }
 
-app.post("/api/register", async (req, res) => {
+app.post("/register", async (req, res) => {
 	mongoose.connect(process.env.MONGO_URL);
 
 	const { name, email, password } = req.body;
@@ -72,7 +72,7 @@ app.post("/api/register", async (req, res) => {
 	}
 });
 
-app.post("/api/login", async (req, res) => {
+app.post("/login", async (req, res) => {
 	mongoose.connect(process.env.MONGO_URL);
 
 	const { email, password } = req.body;
@@ -96,7 +96,7 @@ app.post("/api/login", async (req, res) => {
 	}
 });
 
-app.get("/api/profile", async (req, res) => {
+app.get("/profile", async (req, res) => {
 	mongoose.connect(process.env.MONGO_URL);
 
 	const { token } = req.cookies;
@@ -111,7 +111,7 @@ app.get("/api/profile", async (req, res) => {
 	}
 });
 
-app.post("/api/logout", (req, res) => {
+app.post("/logout", (req, res) => {
 	res.cookie("token", "").json({ message: "Logged out" });
 });
 
@@ -132,21 +132,17 @@ app.post("/upload-by-link", async (req, res) => {
 });
 
 const photosMiddleware = multer({ dest: "/tmp" });
-app.post(
-	"/api/upload",
-	photosMiddleware.array("photos", 100),
-	async (req, res) => {
-		const uploadedFiles = [];
-		for (let i = 0; i < req.files.length; i++) {
-			const { path, originalname, mimetype } = req.files[i];
-			const url = await uploadToS3(path, originalname, mimetype);
-			uploadedFiles.push(url);
-		}
-		res.json(uploadedFiles);
+app.post("/upload", photosMiddleware.array("photos", 100), async (req, res) => {
+	const uploadedFiles = [];
+	for (let i = 0; i < req.files.length; i++) {
+		const { path, originalname, mimetype } = req.files[i];
+		const url = await uploadToS3(path, originalname, mimetype);
+		uploadedFiles.push(url);
 	}
-);
+	res.json(uploadedFiles);
+});
 
-app.post("/api/places", (req, res) => {
+app.post("/places", (req, res) => {
 	mongoose.connect(process.env.MONGO_URL);
 
 	const {
@@ -183,7 +179,7 @@ app.post("/api/places", (req, res) => {
 	});
 });
 
-app.get("/api/user-places", (req, res) => {
+app.get("/user-places", (req, res) => {
 	mongoose.connect(process.env.MONGO_URL);
 
 	const { token } = req.cookies;
@@ -194,14 +190,14 @@ app.get("/api/user-places", (req, res) => {
 	});
 });
 
-app.get("/api/places/:id", async (req, res) => {
+app.get("/places/:id", async (req, res) => {
 	mongoose.connect(process.env.MONGO_URL);
 
 	const { id } = req.params;
 	res.json(await Place.findById(id));
 });
 
-app.put("/api/places", async (req, res) => {
+app.put("/places", async (req, res) => {
 	mongoose.connect(process.env.MONGO_URL);
 
 	const { token } = req.cookies;
@@ -241,20 +237,20 @@ app.put("/api/places", async (req, res) => {
 	});
 });
 
-app.get("/api/places", async (req, res) => {
+app.get("/places", async (req, res) => {
 	mongoose.connect(process.env.MONGO_URL);
 
 	res.json(await Place.find());
 });
 
-app.get("/api/users/:id", async (req, res) => {
+app.get("/users/:id", async (req, res) => {
 	mongoose.connect(process.env.MONGO_URL);
 
 	const { id } = req.params;
 	res.json(await User.findById(id));
 });
 
-app.put("/api/user-profile-photo", async (req, res) => {
+app.put("/user-profile-photo", async (req, res) => {
 	mongoose.connect(process.env.MONGO_URL);
 
 	const { profilePhoto } = req.body;
@@ -268,7 +264,7 @@ app.put("/api/user-profile-photo", async (req, res) => {
 	});
 });
 
-app.put("/api/user/favorites", async (req, res) => {
+app.put("/user/favorites", async (req, res) => {
 	mongoose.connect(process.env.MONGO_URL);
 
 	const { placeId } = req.body;
@@ -285,7 +281,7 @@ app.put("/api/user/favorites", async (req, res) => {
 	});
 });
 
-app.delete("/api/user/favorites", async (req, res) => {
+app.delete("/user/favorites", async (req, res) => {
 	mongoose.connect(process.env.MONGO_URL);
 
 	const { placeId } = req.body;
@@ -304,7 +300,7 @@ app.delete("/api/user/favorites", async (req, res) => {
 	});
 });
 
-app.get("/api/account/favorites", async (req, res) => {
+app.get("/account/favorites", async (req, res) => {
 	mongoose.connect(process.env.MONGO_URL);
 
 	const { token } = req.cookies;
@@ -318,7 +314,7 @@ app.get("/api/account/favorites", async (req, res) => {
 	});
 });
 
-app.post("/api/booking", async (req, res) => {
+app.post("/booking", async (req, res) => {
 	mongoose.connect(process.env.MONGO_URL);
 
 	const { token } = req.cookies;
@@ -339,7 +335,7 @@ app.post("/api/booking", async (req, res) => {
 	});
 });
 
-app.delete("/api/booking", async (req, res) => {
+app.delete("/booking", async (req, res) => {
 	mongoose.connect(process.env.MONGO_URL);
 
 	const { bookingId } = req.body;
@@ -354,7 +350,7 @@ app.delete("/api/booking", async (req, res) => {
 	});
 });
 
-app.get("/api/account/bookings", async (req, res) => {
+app.get("/account/bookings", async (req, res) => {
 	mongoose.connect(process.env.MONGO_URL);
 
 	const { token } = req.cookies;
