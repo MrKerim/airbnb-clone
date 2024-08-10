@@ -6,6 +6,7 @@ export default function Layout() {
 		<div className="p-5 flex flex-col min-h-screen ">
 			<Header />
 			<Outlet />
+			<div className="mb-20"></div>
 		</div>
 	);
 }
